@@ -17,6 +17,8 @@
  */
 package dev.nishisan.graph.tests;
 
+import dev.nishisan.graph.IGraph;
+import dev.nishisan.graph.elements.impl.StringEdge;
 import dev.nishisan.graph.elements.impl.StringVertex;
 import dev.nishisan.graph.impl.StringGraph;
 import java.util.ArrayList;
@@ -34,10 +36,13 @@ public class BasicStringGraphStressTest {
 
     @Test
     public void createLargeGraphTest() throws InterruptedException, ExecutionException {
-        StringGraph graph = new StringGraph();
+        /**
+         * Initiate interface
+         */
+        IGraph<StringEdge, StringVertex> graph = new StringGraph();
 
-        int levels = 3; // Número de níveis no grafo
-        int nodesPerLevel = 4; // Nós por nível
+        int levels = 3;         // Número de níveis no grafo
+        int nodesPerLevel = 4;  // Nós por nível
 
         // Lista para guardar os nós do nível anterior
         List<StringVertex> prevLevelNodes = new ArrayList<>();
@@ -71,22 +76,22 @@ public class BasicStringGraphStressTest {
         System.out.println("Found Solutions:");
         AtomicLong total = new AtomicLong(0);
         // single thread
-        graph.walk(firstNode, 0, 4).forEach(a -> {
-//            System.out.println("Found" + a.size());
-            total.incrementAndGet();
-        });
 
+        graph.walk(firstNode, 0, 4).forEach(a -> {
+            total.incrementAndGet();
+            System.out.println("Found:" + total.get());
+        });
+        
+//        graph.walk(firstNode).forEach(a -> {
+//            total.incrementAndGet();
+//        });
+
+        /**
+         * .88284 é o esperado para 3L 4N nodes
+         */
         System.out.println("Found.." + total.get());
         System.out.println("Max Queue Usage.." + graph.getMaxQueueUsage());
-//        Iterator<List<StringEdge>> it = graph.walk(firstNode, 0, 4).iterator();
-//        System.out.println("Hello");
-//        while (it.hasNext()) {
-//            List<StringEdge> a = it.next();
-////            System.out.println("Found");
-//            total.incrementAndGet();
-//        }
-//
-//        System.out.println("Done..." + total.get());
-//    }
+
     }
+
 }

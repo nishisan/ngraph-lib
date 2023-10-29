@@ -19,6 +19,8 @@ package dev.nishisan.graph;
 
 import dev.nishisan.graph.elements.IEdge;
 import dev.nishisan.graph.elements.IVertex;
+import dev.nishisan.graph.processmanager.IGraphProcessManager;
+import dev.nishisan.graph.processmanager.SimpleProcessManager;
 import dev.nishisan.graph.providers.IElementProvider;
 import dev.nishisan.graph.queue.GraphResultQueue;
 import java.util.ArrayList;
@@ -26,6 +28,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
@@ -38,6 +41,7 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -54,6 +58,8 @@ public abstract class AbsBaseGraph<E extends IEdge, V extends IVertex> implement
 
     private Boolean isMultiThreaded = false;
 
+    private IGraphProcessManager processManager = new SimpleProcessManager();
+
     private final AtomicLong iterationCounter = new AtomicLong(0L);
 
     private final IElementProvider<E, V> elementProvider;
@@ -64,16 +70,25 @@ public abstract class AbsBaseGraph<E extends IEdge, V extends IVertex> implement
 
     private BlockingQueue<Runnable> threadPoolQueue;
 
+    private final ReentrantLock lock = new ReentrantLock();
+
+    private Future<?> startThread;
+
     /**
      * This queue, can lead to memory issues.
      */
-    private final GraphResultQueue<List<E>> resultQueue = new GraphResultQueue<>(100);
+    private final GraphResultQueue<List<E>> resultQueue;
 
-    private final Set<Future<?>> workerList = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final ExecutorService internalThreadPool = Executors.newFixedThreadPool(2);
 
     public AbsBaseGraph(IElementProvider<E, V> elementProvider) {
         this.elementProvider = elementProvider;
+        resultQueue = new GraphResultQueue<>();
+    }
+
+    public AbsBaseGraph(IElementProvider<E, V> elementProvider, int queueCapacity) {
+        this.elementProvider = elementProvider;
+        resultQueue = new GraphResultQueue<>(queueCapacity);
     }
 
     private void setThreadCount(int threadCount) {
@@ -91,43 +106,80 @@ public abstract class AbsBaseGraph<E extends IEdge, V extends IVertex> implement
 
     @Override
     public Stream<List<E>> walk(V startVertex, Integer maxDeph, Integer threadCount) {
+        /**
+         * This will create the Callee Thread...
+         */
         CompletableFuture running = CompletableFuture.runAsync(() -> {
-            runDFS(startVertex, null, maxDeph, threadCount);  // Assume runDFS fills resultQueue
-        });
+            /**
+             * This will create the processing thread
+             */
+            this.startThread = runDFS(startVertex, null, maxDeph, threadCount);
 
-//        Future<?> running = runDFS(startVertex, null, maxDeph, threadCount);
+        });
         return generateStream(running);
+
     }
 
     @Override
     public Stream<List<E>> walk(V startVertex, Integer maxDeph) {
-        CompletableFuture running = CompletableFuture.runAsync(() -> {
-            runDFS(startVertex, null, maxDeph, null);
-        });
 
+        /**
+         * This will create the Callee Thread...
+         */
+        CompletableFuture running = CompletableFuture.runAsync(() -> {
+            /**
+             * This will create the processing thread
+             */
+            this.startThread = runDFS(startVertex, null, maxDeph, null);
+
+        });
         return generateStream(running);
     }
 
     @Override
     public Stream<List<E>> walk(V startVertex) {
+        /**
+         * This will create the Callee Thread...
+         */
         CompletableFuture running = CompletableFuture.runAsync(() -> {
-            runDFS(startVertex, null, 0, null);
+            /**
+             * This will create the processing thread
+             */
+            this.startThread = runDFS(startVertex, null, 0, null);
+
         });
         return generateStream(running);
     }
 
     @Override
     public Stream<List<E>> walk(V startVertex, V endVertex) {
+
+        /**
+         * This will create the Callee Thread...
+         */
         CompletableFuture running = CompletableFuture.runAsync(() -> {
-            runDFS(startVertex, endVertex, 0, null);
+            /**
+             * This will create the processing thread
+             */
+            this.startThread = runDFS(startVertex, endVertex, 0, null);
+
         });
+
         return generateStream(running);
     }
 
     @Override
     public Stream<List<E>> walk(V startVertex, V endVertex, Integer maxDeph, Integer threadCount) {
+
+        /**
+         * This will create the Callee Thread...
+         */
         CompletableFuture running = CompletableFuture.runAsync(() -> {
-            runDFS(startVertex, endVertex, 0, null);
+            /**
+             * This will create the processing thread
+             */
+            this.startThread = runDFS(startVertex, endVertex, 0, null);
+
         });
         return generateStream(running);
     }
@@ -142,6 +194,10 @@ public abstract class AbsBaseGraph<E extends IEdge, V extends IVertex> implement
      * @return
      */
     private Future<?> runDFS(V startVertex, V endVertex, Integer maxDeph, Integer threadCount) {
+        /**
+         * Notify Process Manager a Process has Started
+         */
+        this.processManager.setStarted();
 
         if (threadCount != null) {
             this.setMultiThreaded(true);
@@ -151,8 +207,11 @@ public abstract class AbsBaseGraph<E extends IEdge, V extends IVertex> implement
             this.setMultiThreaded(false);
         }
 
-//        this.internalThreadPool.submit(new InternalStatsThread());
+        /**
+         * Here a new DFS Thread is created...
+         */
         return internalThreadPool.submit(() -> {
+            Thread.currentThread().setName("RUNDFS");
             List<E> currentPath = new ArrayList<>();
             Set<V> visitedVertex = Collections.newSetFromMap(new ConcurrentHashMap<>());
             this.dfs(startVertex, endVertex, currentPath, visitedVertex, 0, maxDeph, null, "ANY");
@@ -166,42 +225,53 @@ public abstract class AbsBaseGraph<E extends IEdge, V extends IVertex> implement
      * @param running
      * @return
      */
-    private Stream<List<E>> generateStream(CompletableFuture running) {
+    private Stream<List<E>> generateStream(Future<?> running) {
 
         Iterator<List<E>> iterator = new Iterator<>() {
+
             @Override
             public boolean hasNext() {
                 /**
-                 * Note we wait for the method to finish //
+                 * Note we wait for the method to finish and the queue to be
+                 * empty
                  */
-                if (!running.isDone()) {
-                    return true;
-                } else if (!resultQueue.isEmpty()) {
-                    return true;
-                } else if (isMultiThreaded) {
-                    if (threadPool.getActiveCount() > 0) {
-                        return true;
-                    } else {
-                        return false;
-                    }
+                boolean result = false;
+                if (resultQueue.isEmpty()) {
+                    result = processManager.isRunning();
                 } else {
-                    return false;
+                    result = true;
                 }
 
+                return result;
             }
 
             @Override
             public List<E> next() {
                 try {
-                    return resultQueue.take();  // Wait until an element is available
+                    List<E> r = null;
+                    while (r == null) {
+                        /**
+                         * Still not perfect but avoids CPU sparks...
+                         */
+
+                        r = resultQueue.poll(10, TimeUnit.MILLISECONDS);
+
+                        if (processManager.isDone()) {
+                            if (r != null) {
+                                return r;
+                            }
+                            return null;
+                        }
+                    }
+                    return r;  // Wait until an element is available
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     return null;
                 }
             }
         };
-        System.out.println("Returning...");
-        return StreamSupport.stream(((Iterable<List<E>>) () -> iterator).spliterator(), false);
+
+        return StreamSupport.stream(((Iterable<List<E>>) () -> iterator).spliterator(), false).filter(Objects::nonNull);
 
     }
 
@@ -221,7 +291,10 @@ public abstract class AbsBaseGraph<E extends IEdge, V extends IVertex> implement
             List<E> currentPath, Set<V> visitedVertex,
             int currentDepth, int maxDepth,
             Predicate<E> nodeFilter, String direction) {
-
+        /**
+         * Notify process manager of the sub process
+         */
+        String uidInstance = this.processManager.notifySubprocessStarted();
         iterationCounter.incrementAndGet();
         try {
             /**
@@ -234,6 +307,7 @@ public abstract class AbsBaseGraph<E extends IEdge, V extends IVertex> implement
                 if (endVertex == null) {
                     this.resultQueue.put(currentPath);
                 }
+
                 return;
             } else {
                 visitedVertex.add(currentVertex);
@@ -247,6 +321,7 @@ public abstract class AbsBaseGraph<E extends IEdge, V extends IVertex> implement
                     /**
                      * Append to the stream queue because is a full walk
                      */
+
                     this.resultQueue.put(currentPath);
                     return;
                 }
@@ -305,7 +380,7 @@ public abstract class AbsBaseGraph<E extends IEdge, V extends IVertex> implement
                                     // I dont like the typecast, if someone can improve it will be great
                                     this.dfs((V) edge.getOther(currentVertex), endVertex, newPath, newVisitedVertex, currentDepth + 1, maxDepth, nodeFilter, direction);
                                 });
-                                workerList.add(f);
+                                processManager.registerChildThread(f);
                             } else {
                                 /**
                                  * Need to reuse the same thread
@@ -340,11 +415,15 @@ public abstract class AbsBaseGraph<E extends IEdge, V extends IVertex> implement
                  */
                 this.resultQueue.put(currentPath);
             }
-        } catch (InterruptedException ex) {
+        } catch (Exception ex) {
             /**
              * Only god know why, and perhaps someone else smarter than me
              */
+            ex.printStackTrace();
             Thread.currentThread().interrupt();
+        } finally {
+            this.processManager.notifySubProcessEnd(uidInstance);
+
         }
 
     }
@@ -379,8 +458,8 @@ public abstract class AbsBaseGraph<E extends IEdge, V extends IVertex> implement
         return this.elementProvider;
     }
 
-    
-    public Integer getMaxQueueUsage(){
+    @Override
+    public Integer getMaxQueueUsage() {
         return this.resultQueue.getMaxUsedCapacity();
     }
 //    private class InternalStatsThread implements Runnable {

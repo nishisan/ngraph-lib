@@ -39,6 +39,10 @@ public class StringGraph extends AbsBaseGraph<StringEdge, StringVertex> {
         super(elementProvider);
     }
 
+    public StringGraph(IElementProvider<StringEdge, StringVertex> elementProvider, int queueCapacity) {
+        super(elementProvider, queueCapacity);
+    }
+
     @Override
     public StringEdge addEdge(StringEdge edge) {
         return this.getProvider().addEdge(edge);

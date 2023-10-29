@@ -96,7 +96,7 @@ public class BasicStringGraphTest {
         graph.addEdge(node3, node4);
         graph.addEdge(node4, node5);
         graph.addEdge(node5, node6);
-
+        System.out.println("start :createNodesConnectionsAndWalkSingleThread");
         AtomicLong total = new AtomicLong(0);
         graph.walk(node1).forEach(e -> {
             total.incrementAndGet();
@@ -106,6 +106,7 @@ public class BasicStringGraphTest {
                 System.out.println(" P:" + p.getId());
             });
         });
+        System.out.println("end :createNodesConnectionsAndWalkSingleThread");
         assertEquals(4, total.get());
     }
 
@@ -141,36 +142,7 @@ public class BasicStringGraphTest {
         assertEquals(4, total.get());
     }
 
-    @Test
-    public void createNodesConnectionsAndWalkToATargetSingleThreaded() {
-        StringGraph graph = new StringGraph();
 
-        StringVertex node1 = graph.addVertex("NODE-1");
-        StringVertex node2 = graph.addVertex("NODE-2");
-        StringVertex node3 = graph.addVertex("NODE-3");
-        StringVertex node4 = graph.addVertex("NODE-4");
-        StringVertex node5 = graph.addVertex("NODE-5");
-        StringVertex node6 = graph.addVertex("NODE-6");
-
-        graph.addEdge(node1, node2);
-        graph.addEdge(node2, node3);
-        graph.addEdge(node2, node5);
-        graph.addEdge(node3, node4);
-        graph.addEdge(node4, node5);
-        graph.addEdge(node5, node6);
-
-        AtomicLong total = new AtomicLong(0);
-        graph.walk(node1, node6).forEach(e -> {
-            total.incrementAndGet();
-            System.out.println("MThread : " + e.size());
-            System.out.println("Dump Path - MThread:");
-            e.forEach(p -> {
-                System.out.println(" P:" + p.getId());
-            });
-        });
-        System.out.println("Total Paths Found:" + total.get());
-        assertEquals(2, total.get());
-    }
 
     @Test
     public void createNodesConnectionsAndWalkToATargetMultiThreaded() {

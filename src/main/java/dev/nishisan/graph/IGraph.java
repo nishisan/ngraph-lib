@@ -120,14 +120,14 @@ public interface IGraph<E extends IEdge, V extends IVertex> {
     public Stream<List<E>> walk(V startVertex, V endVertex);
 
 //    public void setMultiThreaded(Boolean mThread);
-
     public Boolean isMultiThreaded();
 
 //    public void setThreadCount(int threadCount);
-
     public IElementProvider<E, V> getProvider();
 
     public Long getVertexCount();
 
     public Long getEdgeCount();
+
+    public Integer getMaxQueueUsage();
 }
