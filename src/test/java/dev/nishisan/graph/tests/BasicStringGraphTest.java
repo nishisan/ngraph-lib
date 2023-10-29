@@ -82,7 +82,7 @@ public class BasicStringGraphTest {
     @Test
     public void createNodesConnectionsAndWalkSingleThread() {
         StringGraph graph = new StringGraph();
-        graph.setMultiThreaded(false); // <-- Will do a Single Thread Walk
+
         StringVertex node1 = graph.addVertex("NODE-1");
         StringVertex node2 = graph.addVertex("NODE-2");
         StringVertex node3 = graph.addVertex("NODE-3");
@@ -106,13 +106,12 @@ public class BasicStringGraphTest {
                 System.out.println(" P:" + p.getId());
             });
         });
-        assertEquals(2, total.get());
+        assertEquals(4, total.get());
     }
 
     @Test
     public void createNodesConnectionsAndWalkMultiThread() {
         StringGraph graph = new StringGraph();
-        graph.setMultiThreaded(true); // <-- Will do a Single Thread Walk
 
         StringVertex node1 = graph.addVertex("NODE-1");
         StringVertex node2 = graph.addVertex("NODE-2");
@@ -130,7 +129,7 @@ public class BasicStringGraphTest {
 
         AtomicLong total = new AtomicLong(0);
 
-        graph.walk(node1).forEach(e -> {
+        graph.walk(node1, 0, 4).forEach(e -> {
             total.incrementAndGet();
             System.out.println("MThread : " + e.size());
             System.out.println("Dump Path - MThread:");
@@ -139,13 +138,12 @@ public class BasicStringGraphTest {
             });
         });
         System.out.println("Total Paths Found:" + total.get());
-        assertEquals(2, total.get());
+        assertEquals(4, total.get());
     }
 
     @Test
     public void createNodesConnectionsAndWalkToATargetSingleThreaded() {
         StringGraph graph = new StringGraph();
-        graph.setMultiThreaded(false); // <-- Will do a Single Thread Walk
 
         StringVertex node1 = graph.addVertex("NODE-1");
         StringVertex node2 = graph.addVertex("NODE-2");
@@ -177,7 +175,6 @@ public class BasicStringGraphTest {
     @Test
     public void createNodesConnectionsAndWalkToATargetMultiThreaded() {
         StringGraph graph = new StringGraph();
-        graph.setMultiThreaded(true); // <-- Will do a Single Thread Walk
 
         StringVertex node1 = graph.addVertex("NODE-1");
         StringVertex node2 = graph.addVertex("NODE-2");
@@ -194,7 +191,7 @@ public class BasicStringGraphTest {
         graph.addEdge(node5, node6);
 
         AtomicLong total = new AtomicLong(0);
-        graph.walk(node1, node5).forEach(e -> {
+        graph.walk(node1, node5, 0, 4).forEach(e -> {
             total.incrementAndGet();
             System.out.println("MThread : " + e.size());
             System.out.println("Dump Path - MThread:");
@@ -204,5 +201,28 @@ public class BasicStringGraphTest {
         });
         System.out.println("Total Paths Found To Target:" + total.get());
         assertEquals(2, total.get());
+    }
+
+    @Test
+    public void basicCircularReferenceProblemTest() {
+        StringGraph graph = new StringGraph();
+
+        StringVertex node1 = graph.addVertex("NODE-1");
+        StringVertex node2 = graph.addVertex("NODE-2");
+        StringVertex node3 = graph.addVertex("NODE-3");
+        StringVertex node4 = graph.addVertex("NODE-4");
+        StringVertex node5 = graph.addVertex("NODE-5");
+        StringVertex node6 = graph.addVertex("NODE-6");
+        graph.addEdge(node1, node2);
+        graph.addEdge(node2, node3);
+        graph.addEdge(node3, node4);
+        graph.addEdge(node4, node5);
+        graph.addEdge(node5, node6);
+        graph.addEdge(node6, node1);
+        System.out.println("Circular Start");
+        graph.walk(node1).forEach(a -> {
+            System.out.println("Achei !" + a.size());
+        });
+        System.out.println("Circular End");
     }
 }

@@ -15,21 +15,20 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package dev.nishisan.graph.elements.impl;
+package dev.nishisan.graph.tests;
 
-import dev.nishisan.graph.elements.AbsBaseElement;
-import dev.nishisan.graph.elements.IVertex;
+import dev.nishisan.graph.queue.GraphResultQueue;
 
 /**
- * A Simple String Vertex Representation
  *
  * @author Lucas Nishimura <lucas.nishimura@gmail.com>
- * created 26.10.2023
+ * created 29.10.2023
  */
-public class StringVertex extends AbsBaseElement<String> implements IVertex<String> {
+public class DynamicStreamTest {
 
-    public StringVertex(String id, String data) {
-        super(id, data);
+    public void dynamicStreamTest() {
+        GraphResultQueue<String> q = new GraphResultQueue<>();
+
+        
     }
-
 }

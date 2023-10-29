@@ -15,21 +15,45 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package dev.nishisan.graph.elements.impl;
+package dev.nishisan.graph.queue;
 
-import dev.nishisan.graph.elements.AbsBaseElement;
-import dev.nishisan.graph.elements.IVertex;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * A Simple String Vertex Representation
  *
  * @author Lucas Nishimura <lucas.nishimura@gmail.com>
- * created 26.10.2023
+ * created 27.10.2023
  */
-public class StringVertex extends AbsBaseElement<String> implements IVertex<String> {
+public class GraphResultQueue<T> extends LinkedBlockingQueue<T> {
 
-    public StringVertex(String id, String data) {
-        super(id, data);
+    private AtomicInteger maxObjectOnQueue = new AtomicInteger(0);
+
+    public GraphResultQueue() {
+    }
+
+    public GraphResultQueue(int capacity) {
+        super(capacity);
+    }
+
+    
+    
+    @Override
+    public void put(T e) throws InterruptedException {
+        int size = this.size();
+        if (size > maxObjectOnQueue.get()) {
+            this.maxObjectOnQueue.set(size);
+        }
+        super.put(e);
+    }
+
+    @Override
+    public T take() throws InterruptedException {
+        return super.take();
+    }
+
+    public Integer getMaxUsedCapacity() {
+        return this.maxObjectOnQueue.get();
     }
 
 }

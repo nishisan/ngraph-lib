@@ -22,9 +22,9 @@ import dev.nishisan.graph.elements.impl.StringEdge;
 import dev.nishisan.graph.elements.impl.StringVertex;
 import dev.nishisan.graph.providers.IElementProvider;
 import dev.nishisan.graph.providers.impl.StringElementProvider;
-import java.util.stream.Stream;
 
 /**
+ * This is a Sample String graph object
  *
  * @author Lucas Nishimura <lucas.nishimura@gmail.com>
  * created 27.10.2023
@@ -35,8 +35,8 @@ public class StringGraph extends AbsBaseGraph<StringEdge, StringVertex> {
         super(new StringElementProvider());
     }
 
-    public StringGraph(IElementProvider<StringEdge, StringVertex> ilementProvider) {
-        super(ilementProvider);
+    public StringGraph(IElementProvider<StringEdge, StringVertex> elementProvider) {
+        super(elementProvider);
     }
 
     @Override
@@ -85,10 +85,6 @@ public class StringGraph extends AbsBaseGraph<StringEdge, StringVertex> {
     public StringVertex getVertexById(String id) {
         return this.getProvider().getVertexById(id);
     }
-
-    
-
-   
 
     @Override
     public Long getVertexCount() {

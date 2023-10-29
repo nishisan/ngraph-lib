@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
+ * This is a Sample Element Provider, with a fixed IN Memory Map
  *
  * @author Lucas Nishimura <lucas.nishimura@gmail.com>
  * created 27.10.2023
