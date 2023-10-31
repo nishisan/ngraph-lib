@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Lucas Nishimura <lucas.nishimura@gmail.com>
+ * Copyright (C) 2023 Lucas Nishimura <lucas.nishimura at gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  *
- * @author Lucas Nishimura <lucas.nishimura@gmail.com>
+ * @author Lucas Nishimura <lucas.nishimura at gmail.com>
  * created 30.10.2023
  */
 public class BfsBasicTest {

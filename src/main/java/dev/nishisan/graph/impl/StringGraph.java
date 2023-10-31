@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Lucas Nishimura <lucas.nishimura@gmail.com>
+ * Copyright (C) 2023 Lucas Nishimura <lucas.nishimura at gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -26,7 +26,7 @@ import dev.nishisan.graph.providers.impl.StringElementProvider;
 /**
  * This is a Sample String graph object
  *
- * @author Lucas Nishimura <lucas.nishimura@gmail.com>
+ * @author Lucas Nishimura <lucas.nishimura at gmail.com>
  * created 27.10.2023
  */
 public class StringGraph extends AbsBaseGraph<StringEdge, StringVertex, String> {

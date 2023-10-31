@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Lucas Nishimura <lucas.nishimura@gmail.com>
+ * Copyright (C) 2023 Lucas Nishimura <lucas.nishimura at gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -22,7 +22,7 @@ import dev.nishisan.graph.providers.IElementProvider;
 /**
  * Stream Graphs Retrieve Dinamically the topology
  *
- * @author Lucas Nishimura <lucas.nishimura@gmail.com>
+ * @author Lucas Nishimura <lucas.nishimura at gmail.com>
  * @param <T>
  * created 26.10.2023
  */

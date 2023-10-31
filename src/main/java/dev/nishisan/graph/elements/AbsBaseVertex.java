@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Lucas Nishimura <lucas.nishimura@gmail.com>
+ * Copyright (C) 2023 Lucas Nishimura <lucas.nishimura at gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,7 +21,7 @@ import java.io.Serializable;
 
 /**
  *
- * @author Lucas Nishimura <lucas.nishimura@gmail.com>
+ * @author Lucas Nishimura <lucas.nishimura at gmail.com>
  * created 26.10.2023
  */
 public abstract class AbsBaseVertex<T extends Serializable> extends AbsBaseElement<T> implements IVertex<T> {
