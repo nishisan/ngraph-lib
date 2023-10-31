@@ -20,11 +20,13 @@ package dev.nishisan.graph.providers.impl;
 import dev.nishisan.graph.elements.impl.StringEdge;
 import dev.nishisan.graph.elements.impl.StringVertex;
 import dev.nishisan.graph.providers.IElementProvider;
+import dev.nishisan.graph.queue.list.EdgeList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This is a Sample Element Provider, with a fixed IN Memory Map
@@ -48,22 +50,22 @@ public class StringElementProvider implements IElementProvider<StringEdge, Strin
     }
 
     @Override
-    public List<StringEdge> getAdjacentEdgesFromVertex(StringVertex vertex, String direction) {
-        List<StringEdge> result = new ArrayList<>();
+    public EdgeList<StringEdge> getAdjacentEdgesFromVertex(StringVertex vertex, String direction) {
+        EdgeList<StringEdge> result = new EdgeList<>();
         if (direction.equalsIgnoreCase("ANY")) {
-            result = this.edges.values().parallelStream().filter(e -> e.contains(vertex)).collect(Collectors.toList());
+            result = this.edges.values().parallelStream().filter(e -> e.contains(vertex)).collect(Collectors.toCollection(EdgeList::new));
         } else if (direction.equals("OUTBOUND")) {
-            result = this.edges.values().parallelStream().filter(e -> e.getFrom().equals(vertex)).collect(Collectors.toList());
+            result = this.edges.values().parallelStream().filter(e -> e.getFrom().equals(vertex)).collect(Collectors.toCollection(EdgeList::new));
         } else if (direction.equals("INBOUND")) {
-            result = this.edges.values().parallelStream().filter(e -> e.getTo().equals(vertex)).collect(Collectors.toList());
+            result = this.edges.values().parallelStream().filter(e -> e.getTo().equals(vertex)).collect(Collectors.toCollection(EdgeList::new));
         }
 
         return result;
     }
 
     @Override
-    public List<StringEdge> getEdgesByVertex(StringVertex vertex) {
-        List<StringEdge> result = this.edges.values().parallelStream().filter(e -> e.contains(vertex)).collect(Collectors.toList());
+    public EdgeList<StringEdge> getEdgesByVertex(StringVertex vertex) {
+        EdgeList<StringEdge> result = this.edges.values().parallelStream().filter(e -> e.contains(vertex)).collect(Collectors.toCollection(EdgeList::new));
         return result;
     }
 
@@ -87,6 +89,11 @@ public class StringElementProvider implements IElementProvider<StringEdge, Strin
     @Override
     public Long getEdgeCount() {
         return Long.valueOf(this.edges.size());
+    }
+
+    @Override
+    public Stream<StringEdge> getEdges() {
+        return this.edges.values().stream();
     }
 
 }

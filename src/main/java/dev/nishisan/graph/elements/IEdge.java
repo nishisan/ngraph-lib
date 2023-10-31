@@ -17,12 +17,17 @@
  */
 package dev.nishisan.graph.elements;
 
+import java.io.Serializable;
+import java.util.List;
+
 /**
  *
  * @author Lucas Nishimura <lucas.nishimura@gmail.com>
  * created 26.10.2023
+ * @param <T>
+ * @param <V>
  */
-public interface IEdge<T, V extends IVertex> extends IElement<T> {
+public interface IEdge<T extends Serializable, V extends IVertex<T>> extends IElement<T> {
 
     public V getFrom();
 
@@ -31,10 +36,11 @@ public interface IEdge<T, V extends IVertex> extends IElement<T> {
     public void setFrom(V aPoint);
 
     public void setTo(V zPoint);
-    
-    
-    
+
     public V getOther(V point) throws IllegalArgumentException;
-    
+
     public boolean contains(V point);
+
+    public List<V> getVertices();
+
 }

@@ -15,20 +15,24 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package dev.nishisan.graph.tests;
+package dev.nishisan.graph.queue.list;
 
-import dev.nishisan.graph.queue.GraphResultQueue;
+import dev.nishisan.graph.elements.IVertex;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  *
  * @author Lucas Nishimura <lucas.nishimura@gmail.com>
- * created 29.10.2023
+ * created 30.10.2023
  */
-public class DynamicStreamTest {
+public class VertexList<V extends IVertex<?>> extends ArrayList<V> {
 
-    public void dynamicStreamTest() {
-        GraphResultQueue<String> q = new GraphResultQueue<>();
-
-        
+    public VertexList() {
     }
+
+    public VertexList(Collection<? extends V> c) {
+        super(c);
+    }
+
 }

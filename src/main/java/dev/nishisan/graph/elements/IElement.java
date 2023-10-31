@@ -17,12 +17,14 @@
  */
 package dev.nishisan.graph.elements;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Lucas Nishimura <lucas.nishimura@gmail.com>
  * created 26.10.2023
  */
-public interface IElement<T> {
+public interface IElement<T extends Serializable> {
 
     public String getId();
 

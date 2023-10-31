@@ -20,7 +20,8 @@ package dev.nishisan.graph;
 import dev.nishisan.graph.elements.IEdge;
 import dev.nishisan.graph.elements.IVertex;
 import dev.nishisan.graph.providers.IElementProvider;
-import java.util.List;
+import dev.nishisan.graph.queue.list.EdgeList;
+import java.io.Serializable;
 import java.util.stream.Stream;
 
 /**
@@ -29,7 +30,7 @@ import java.util.stream.Stream;
  * @param <E>
  * @param <V> created 26.10.2023
  */
-public interface IGraph<E extends IEdge, V extends IVertex> {
+public interface IGraph<E extends IEdge<T, V>, V extends IVertex<T>, T extends Serializable> {
 
     public E addEdge(V from, V to) throws UnsupportedOperationException;
 
@@ -96,28 +97,38 @@ public interface IGraph<E extends IEdge, V extends IVertex> {
      * @param startVertex
      * @return
      */
-    public Stream<List<E>> walk(V startVertex);
+    public Stream<EdgeList<E>> dfs(V startVertex);
 
     /**
      *
-     * @param startVertex - The Vertex to start walking from
+     * @param startVertex - The Vertex to start dfsing from
      * @param maxDeph - The max deph, 0 means no limit
      * @return
      */
-    public Stream<List<E>> walk(V startVertex, Integer maxDeph);
+    public Stream<EdgeList<E>> dfs(V startVertex, Integer maxDeph);
 
     /**
      *
-     * @param startVertex - The Vertex to start walking from
+     * @param startVertex - The Vertex to start dfsing from
      * @param maxDeph - The max deph, 0 means no limit
-     * @param threadCount - The amount of workers threads to perform the walk
+     * @param threadCount - The amount of workers threads to perform the dfs
      * @return
      */
-    public Stream<List<E>> walk(V startVertex, Integer maxDeph, Integer threadCount);
+    public Stream<EdgeList<E>> dfs(V startVertex, Integer maxDeph, Integer threadCount);
 
-    public Stream<List<E>> walk(V startVertex, V endVertex, Integer maxDeph, Integer threadCount);
+    public Stream<EdgeList<E>> dfs(V startVertex, V endVertex, Integer maxDeph, Integer threadCount);
 
-    public Stream<List<E>> walk(V startVertex, V endVertex);
+    public Stream<EdgeList<E>> dfs(V startVertex, V endVertex);
+
+    /**
+     * BFS Example
+     *
+     * @param startVertex
+     * @return
+     */
+    public Stream<EdgeList<E>> bfs(V startVertex);
+
+    public Stream<EdgeList<E>> bfs(V startVertex, V endVertex);
 
 //    public void setMultiThreaded(Boolean mThread);
     public Boolean isMultiThreaded();
@@ -130,4 +141,5 @@ public interface IGraph<E extends IEdge, V extends IVertex> {
     public Long getEdgeCount();
 
     public Integer getMaxQueueUsage();
+
 }

@@ -29,7 +29,7 @@ import dev.nishisan.graph.providers.impl.StringElementProvider;
  * @author Lucas Nishimura <lucas.nishimura@gmail.com>
  * created 27.10.2023
  */
-public class StringGraph extends AbsBaseGraph<StringEdge, StringVertex> {
+public class StringGraph extends AbsBaseGraph<StringEdge, StringVertex, String> {
 
     public StringGraph() {
         super(new StringElementProvider());

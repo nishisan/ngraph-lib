@@ -23,6 +23,8 @@ import dev.nishisan.graph.elements.impl.StringVertex;
 import dev.nishisan.graph.impl.StringGraph;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 import org.junit.jupiter.api.Test;
@@ -32,14 +34,14 @@ import org.junit.jupiter.api.Test;
  * @author Lucas Nishimura <lucas.nishimura@gmail.com>
  * created 27.10.2023
  */
-public class BasicStringGraphStressTest {
+public class DfsBasicStringGraphStressTest {
 
     @Test
     public void createLargeGraphTest() throws InterruptedException, ExecutionException {
         /**
          * Initiate interface
          */
-        IGraph<StringEdge, StringVertex> graph = new StringGraph();
+        IGraph<StringEdge, StringVertex,String> graph = new StringGraph();
 
         int levels = 3;         // Número de níveis no grafo
         int nodesPerLevel = 4;  // Nós por nível
@@ -77,15 +79,26 @@ public class BasicStringGraphStressTest {
         AtomicLong total = new AtomicLong(0);
         // single thread
 
-        graph.walk(firstNode, 0, 4).forEach(a -> {
-            total.incrementAndGet();
-            System.out.println("Found:" + total.get());
+//        graph.getProvider().
+        Map<Integer, Boolean> s = new ConcurrentHashMap<>();
+        graph.getProvider().getEdges().forEach(e -> {
+            if (s.containsKey(e.hashCode())){
+                System.out.println("Duplicated");
+                System.out.println("Hash:" + e.hashCode());
+            }else{
+                s.put(e.hashCode(), true);
+            }
+            
         });
-        
-//        graph.walk(firstNode).forEach(a -> {
+        System.out.println("Done...");
+        graph.dfs(firstNode, 0, 4).forEach(a -> {
+            total.incrementAndGet();
+
+        });
+
+//        graph.dfs(firstNode).forEach(a -> {
 //            total.incrementAndGet();
 //        });
-
         /**
          * .88284 é o esperado para 3L 4N nodes
          */

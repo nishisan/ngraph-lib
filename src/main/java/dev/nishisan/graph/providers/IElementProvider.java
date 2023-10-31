@@ -19,29 +19,86 @@ package dev.nishisan.graph.providers;
 
 import dev.nishisan.graph.elements.IEdge;
 import dev.nishisan.graph.elements.IVertex;
-import java.util.List;
+import dev.nishisan.graph.queue.list.EdgeList;
+import java.io.Serializable;
+import java.util.stream.Stream;
 
 /**
  *
  * @author Lucas Nishimura <lucas.nishimura@gmail.com>
  * created 26.10.2023
  */
-public interface IElementProvider<E extends IEdge, V extends IVertex> {
+public interface IElementProvider<E extends IEdge<? extends Serializable, ? extends IVertex<? extends Serializable>>, V extends IVertex<? extends Serializable>> {
 
+    
+    /**
+     * Retrieve an Edge by its ID
+     *
+     * @param id
+     * @return
+     */
     public E getEdgeById(String id);
 
+    /**
+     * Retrieve a Vertex by its ID
+     *
+     * @param id
+     * @return
+     */
     public V getVertexById(String id);
 
-    public List<E> getAdjacentEdgesFromVertex(V vertex, String direction);
+    /**
+     * Retrieves the direct connected edges from the vertex
+     *
+     * @param vertex
+     * @param direction
+     * @return
+     */
+    public EdgeList<E> getAdjacentEdgesFromVertex(V vertex, String direction);
 
-    public List<E> getEdgesByVertex(V vertex);
+    /**
+     * Get the list of edges by a given vertex
+     *
+     * @param vertex
+     * @return
+     */
+    public EdgeList<E> getEdgesByVertex(V vertex);
 
+    /**
+     * Adds an Edge to the the persistence layer
+     *
+     * @param e
+     * @return
+     */
     public E addEdge(E e);
 
+    /**
+     * Adds a vertex to the persistence layer
+     *
+     * @param v
+     * @return
+     */
     public V addVertex(V v);
 
+    /**
+     * Get the total vertex count in the persistence layer
+     *
+     * @return
+     */
     public Long getVertexCount();
 
+    /**
+     * Get the total edge count in the persistence layer
+     *
+     * @return
+     */
     public Long getEdgeCount();
+
+    /**
+     * Return a Stream of all edges
+     *
+     * @return
+     */
+    public Stream<E> getEdges();
 
 }

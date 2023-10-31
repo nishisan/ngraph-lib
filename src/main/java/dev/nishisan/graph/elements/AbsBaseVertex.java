@@ -17,14 +17,16 @@
  */
 package dev.nishisan.graph.elements;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Lucas Nishimura <lucas.nishimura@gmail.com>
  * created 26.10.2023
  */
-public abstract class AbsBaseVertex<T> extends AbsBaseElement<T> implements IVertex<T>{
+public abstract class AbsBaseVertex<T extends Serializable> extends AbsBaseElement<T> implements IVertex<T> {
 
-    public AbsBaseVertex(String id,T data) {
-        super(id,data);
+    public AbsBaseVertex(String id, T data) {
+        super(id, data);
     }
 }

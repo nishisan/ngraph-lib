@@ -31,8 +31,8 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class GraphResultQueue<T> extends LinkedBlockingQueue<T> {
 
-    private AtomicInteger maxObjectOnQueue = new AtomicInteger(0);
-    private AtomicLong addedObjectCount = new AtomicLong(0);
+    private final AtomicInteger maxObjectOnQueue = new AtomicInteger(0);
+    private final AtomicLong addedObjectCount = new AtomicLong(0);
 
     public GraphResultQueue() {
     }

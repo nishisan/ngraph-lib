@@ -17,20 +17,23 @@
  */
 package dev.nishisan.graph.elements;
 
+import java.io.Serializable;
+import java.util.List;
+
 /**
  *
  * @author Lucas Nishimura <lucas.nishimura@gmail.com>
  * @param <T>
  * @param <V> created 26.10.2023
  */
-public abstract class AbsBaseEdge<T, V extends IVertex> extends AbsBaseElement<T> implements IEdge<T, V> {
+public abstract class AbsBaseEdge<T extends Serializable, V extends IVertex<T>> extends AbsBaseElement<T> implements IEdge<T, V> {
 
     private V from;
 
     private V to;
 
-    public AbsBaseEdge(String id,T data) {        
-        super(id,data);
+    public AbsBaseEdge(String id, T data) {
+        super(id, data);
     }
 
     @Override
@@ -55,7 +58,7 @@ public abstract class AbsBaseEdge<T, V extends IVertex> extends AbsBaseElement<T
 
     @Override
     public V getOther(V point) throws IllegalArgumentException {
-        if (point==null){
+        if (point == null) {
             throw new IllegalArgumentException("Point is Null Please Check");
         }
         if (this.from.equals(point) || this.to.equals(point)) {
@@ -74,6 +77,11 @@ public abstract class AbsBaseEdge<T, V extends IVertex> extends AbsBaseElement<T
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<V> getVertices() {
+        return List.of(this.from, this.to);
     }
 
 }

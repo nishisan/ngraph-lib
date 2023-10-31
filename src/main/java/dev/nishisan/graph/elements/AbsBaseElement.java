@@ -17,6 +17,7 @@
  */
 package dev.nishisan.graph.elements;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -24,7 +25,7 @@ import java.util.Objects;
  * @author Lucas Nishimura <lucas.nishimura@gmail.com>
  * created 26.10.2023
  */
-public abstract class AbsBaseElement<T> implements IElement<T> {
+public abstract class AbsBaseElement<T extends Serializable> implements IElement<T> {
 
     private String id;
     private T data;

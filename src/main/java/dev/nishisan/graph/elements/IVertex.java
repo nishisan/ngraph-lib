@@ -17,11 +17,14 @@
  */
 package dev.nishisan.graph.elements;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Lucas Nishimura <lucas.nishimura@gmail.com>
  * created 26.10.2023
+ * @param <T> Any Seriali
  */
-public interface IVertex<T> extends IElement<T> {
+public interface IVertex<T extends Serializable> extends IElement<T> {
 
 }

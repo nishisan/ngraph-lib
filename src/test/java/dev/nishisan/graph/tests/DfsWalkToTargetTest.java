@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
  * @author Lucas Nishimura <lucas.nishimura@gmail.com>
  * created 29.10.2023
  */
-public class WalkToTargetTest {
+public class DfsWalkToTargetTest {
 
     @Test
     public void createNodesConnectionsAndWalkToATargetSingleThreaded() {
@@ -49,18 +49,16 @@ public class WalkToTargetTest {
         graph.addEdge(node5, node6);
         System.out.println("start :createNodesConnectionsAndWalkToATargetSingleThreaded");
         AtomicLong total = new AtomicLong(0);
-        
-        graph.walk(node1, node6).forEach(e -> {
+
+        graph.dfs(node1, node6,0,4).forEach(e -> {
             total.incrementAndGet();
             System.out.println("MThread : " + e.size());
             System.out.println("Dump Path - MThread:");
-            e.forEach(p -> {
+            e.getVertices().forEach(p -> {
                 System.out.println(" P:" + p.getId());
             });
         });
-        
-        
-        
+
         System.out.println("Total Paths Found:" + total.get());
         System.out.println("end :createNodesConnectionsAndWalkToATargetSingleThreaded");
         assertEquals(2, total.get());
