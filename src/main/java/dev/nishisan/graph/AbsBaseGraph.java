@@ -57,8 +57,8 @@ import java.util.stream.StreamSupport;
  * @param <E>
  * @param <V>
  */
-public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, T extends Serializable> 
-    implements IGraph<E, V, T> {
+public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, T extends Serializable>
+        implements IGraph<E, V, T> {
 
     /**
      * This flag tells if the graph should be multi threaded or not
@@ -611,20 +611,14 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
                                  * Can Submit new thread
                                  */
                                 Future<?> f = this.threadPool.submit(() -> {
-                                    // I dont like the typecast, if someone can improve it will be great
-                                    V other = edge.getOther(currentVertex);
-                                    
-                                    
-                                    this.dfs((V) edge.getOther(currentVertex), endVertex, newPath, newVisitedVertex, currentDepth + 1, maxDepth, nodeFilter, direction);
+                                    this.dfs(edge.getOther(currentVertex), endVertex, newPath, newVisitedVertex, currentDepth + 1, maxDepth, nodeFilter, direction);
                                 });
                                 processManager.registerChildThread(f);
                             } else {
                                 /**
                                  * Need to reuse the same thread
                                  */
-
-                                // I dont like the typecast, if someone can improve it will be great
-                                this.dfs((V) edge.getOther(currentVertex), endVertex, newPath, newVisitedVertex, currentDepth + 1, maxDepth, nodeFilter, direction);
+                                this.dfs(edge.getOther(currentVertex), endVertex, newPath, newVisitedVertex, currentDepth + 1, maxDepth, nodeFilter, direction);
                             }
 
                         } else {
@@ -632,8 +626,7 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
                              * In this case by default will use a single thread
                              */
 
-                            // I dont like the typecast, if someone can improve it will be great
-                            this.dfs((V) edge.getOther(currentVertex), endVertex, newPath, newVisitedVertex, currentDepth + 1, maxDepth, nodeFilter, direction);
+                            this.dfs(edge.getOther(currentVertex), endVertex, newPath, newVisitedVertex, currentDepth + 1, maxDepth, nodeFilter, direction);
                         }
                     } else {
                         /**

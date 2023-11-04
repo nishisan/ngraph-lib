@@ -33,6 +33,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @author Lucas Nishimura <lucas.nishimura at gmail.com>
  * created 30.10.2023
+ * @param <E>
+ * @param <V>
+ * @param <T>
  */
 public class LouvainAlgorithm<E extends IEdge<T, V>, V extends IVertex<T>, T extends Serializable> {
 
@@ -75,6 +78,9 @@ public class LouvainAlgorithm<E extends IEdge<T, V>, V extends IVertex<T>, T ext
         Map<V, V> nodeToCommunity = new HashMap<>();
         this.graph.getProvider().getEdges().forEach((E edge) -> {
             edge.getVertices().forEach((V v) -> {
+                /**
+                 * This can grow Big... needs memory improvements
+                 */
                 nodeToCommunity.put(v, v);
             });
         });
