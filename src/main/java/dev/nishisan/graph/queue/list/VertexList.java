@@ -17,7 +17,9 @@
  */
 package dev.nishisan.graph.queue.list;
 
+import dev.nishisan.graph.elements.IEdge;
 import dev.nishisan.graph.elements.IVertex;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -26,7 +28,9 @@ import java.util.Collection;
  * @author Lucas Nishimura <lucas.nishimura at gmail.com>
  * created 30.10.2023
  */
-public class VertexList<V extends IVertex<?>> extends ArrayList<V> {
+public class VertexList<T extends Serializable, 
+    V extends IVertex<T, E>, 
+    E extends IEdge<T, V>> extends ArrayList<V> {
 
     public VertexList() {
     }

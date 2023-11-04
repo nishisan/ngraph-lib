@@ -57,8 +57,7 @@ import java.util.stream.StreamSupport;
  * @param <E>
  * @param <V>
  */
-public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, T extends Serializable>
-        implements IGraph<E, V, T> {
+public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V>, V extends IVertex<T, E>> implements IGraph<T, V, E> {
 
     /**
      * This flag tells if the graph should be multi threaded or not
@@ -78,7 +77,7 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
     /**
      * The element provider
      */
-    private final IElementProvider<E, V> elementProvider;
+    private final IElementProvider<T, E, V> elementProvider;
 
     /**
      * The default threads workers
@@ -98,7 +97,7 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
     /**
      * This queue, can lead to memory issues.
      */
-    private final GraphResultQueue<EdgeList<E>> resultQueue;
+    private final GraphResultQueue<EdgeList<T, V, E>> resultQueue;
 
     /**
      * Interna Thread Pool
@@ -110,7 +109,7 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
      *
      * @param elementProvider
      */
-    public AbsBaseGraph(IElementProvider<E, V> elementProvider) {
+    public AbstractGraph(IElementProvider<T, E, V> elementProvider) {
         this.elementProvider = elementProvider;
         resultQueue = new GraphResultQueue<>();
     }
@@ -122,7 +121,7 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
      * @param elementProvider
      * @param queueCapacity
      */
-    public AbsBaseGraph(IElementProvider<E, V> elementProvider, int queueCapacity) {
+    public AbstractGraph(IElementProvider<T, E, V> elementProvider, int queueCapacity) {
         this.elementProvider = elementProvider;
         resultQueue = new GraphResultQueue<>(queueCapacity);
     }
@@ -165,7 +164,7 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
      * @return - A stream of list of edges found in the process
      */
     @Override
-    public Stream<EdgeList<E>> dfs(V startVertex, Integer maxDepth, Integer threadCount) {
+    public Stream<EdgeList<T, V, E>> dfs(V startVertex, Integer maxDepth, Integer threadCount) {
         /**
          * This will create the Callee Thread...
          */
@@ -176,6 +175,7 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
             runDFS(startVertex, null, maxDepth, threadCount);
 
         });
+
         return generateStream(running);
 
     }
@@ -189,7 +189,7 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
      * @return - A stream of list of edges found in the process
      */
     @Override
-    public Stream<EdgeList<E>> dfs(V startVertex, Integer maxDepth) {
+    public Stream<EdgeList<T, V, E>> dfs(V startVertex, Integer maxDepth) {
         /**
          * This will create the Callee Thread...
          */
@@ -209,7 +209,7 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
      * @return - A stream of list of edges found in the process
      */
     @Override
-    public Stream<EdgeList<E>> dfs(V startVertex) {
+    public Stream<EdgeList<T, V, E>> dfs(V startVertex) {
         /**
          * This will create the Callee Thread...
          */
@@ -233,7 +233,7 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
      * endVertex
      */
     @Override
-    public Stream<EdgeList<E>> dfs(V startVertex, V endVertex) {
+    public Stream<EdgeList<T, V, E>> dfs(V startVertex, V endVertex) {
 
         /**
          * This will create the Callee Thread...
@@ -250,7 +250,7 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
     }
 
     @Override
-    public Stream<EdgeList<E>> dfs(V startVertex, V endVertex, Integer maxDepth, Integer threadCount) {
+    public Stream<EdgeList<T, V, E>> dfs(V startVertex, V endVertex, Integer maxDepth, Integer threadCount) {
 
         /**
          * This will create the Callee Thread...
@@ -266,7 +266,7 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
     }
 
     @Override
-    public Stream<EdgeList<E>> bfs(V startVertex) {
+    public Stream<EdgeList<T, V, E>> bfs(V startVertex) {
         CompletableFuture running = CompletableFuture.runAsync(() -> {
             /**
              * This will create the processing thread
@@ -278,7 +278,7 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
     }
 
     @Override
-    public Stream<EdgeList<E>> bfs(V startVertex, V endVertex) {
+    public Stream<EdgeList<T, V, E>> bfs(V startVertex, V endVertex) {
         CompletableFuture running = CompletableFuture.runAsync(() -> {
             /**
              * This will create the processing thread
@@ -340,7 +340,7 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
          */
         return internalThreadPool.submit(() -> {
             Thread.currentThread().setName("RUNDFS");
-            EdgeList<E> currentPath = new EdgeList<>();
+            EdgeList<T, V, E> currentPath = new EdgeList<>();
             Set<V> visitedVertex = Collections.newSetFromMap(new ConcurrentHashMap<>());
             this.dfs(startVertex, endVertex, currentPath, visitedVertex, 0, maxDepth, null, "ANY");
             internalThreadPool.shutdown();
@@ -353,9 +353,9 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
      * @param running
      * @return
      */
-    private Stream<EdgeList<E>> generateStream(Future<?> running) {
+    private Stream<EdgeList<T, V, E>> generateStream(CompletableFuture<?> running) {
 
-        Iterator<EdgeList<E>> iterator = new Iterator<>() {
+        Iterator<EdgeList<T, V, E>> iterator = new Iterator<>() {
 
             @Override
             public boolean hasNext() {
@@ -374,9 +374,9 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
             }
 
             @Override
-            public EdgeList<E> next() {
+            public EdgeList<T, V, E> next() {
                 try {
-                    EdgeList<E> r = null;
+                    EdgeList<T, V, E> r = null;
                     while (r == null) {
                         /**
                          * Still not perfect but avoids CPU sparks...
@@ -398,9 +398,17 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
                 }
             }
         };
-        return StreamSupport.stream(((Iterable<EdgeList<E>>) () -> iterator).spliterator(), false).filter(Objects::nonNull);
+
+       
+        return StreamSupport.stream(((Iterable<EdgeList<T, V, E>>) () -> iterator).spliterator(), false).filter(Objects::nonNull);
     }
 
+    /**
+     * Run Local BFS Implementation
+     *
+     * @param startVertex
+     * @param endVertex
+     */
     private void localBfs(V startVertex, V endVertex) {
         ConcurrentLinkedQueue<V> queue = new ConcurrentLinkedQueue<>();
         Set<V> visited = Collections.newSetFromMap(new ConcurrentHashMap<>());
@@ -433,7 +441,7 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
                             this.resultQueue.add(new EdgeList<>(shortestPathEdges));
                         }
                         if (currentVertex != null) {
-                            EdgeList<E> edges = this.elementProvider.getAdjacentEdgesFromVertex(currentVertex, "ANY");
+                            EdgeList<T, V, E> edges = this.elementProvider.getAdjacentEdgesFromVertex(currentVertex, "ANY");
                             for (E edge : edges) {
                                 V neighbor = (V) edge.getOther(currentVertex);
                                 if (!visited.contains(neighbor)) {
@@ -444,7 +452,6 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
                             }
                         }
 
-//                    return endVertex == null ? null : shortestPathEdges;  // return null for full BFS, shortestPathEdges for specified endVertex
                     });
                     processManager.registerChildThread(f);
                 } else {
@@ -463,7 +470,7 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
                         return;
                     }
                     if (currentVertex != null) {
-                        EdgeList<E> edges = this.elementProvider.getAdjacentEdgesFromVertex(currentVertex, "ANY");
+                        EdgeList<T, V, E> edges = this.elementProvider.getAdjacentEdgesFromVertex(currentVertex, "ANY");
                         for (E edge : edges) {
 
                             V neighbor = (V) edge.getOther(currentVertex);
@@ -493,7 +500,7 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
                     return;
                 }
                 if (currentVertex != null) {
-                    EdgeList<E> edges = this.elementProvider.getAdjacentEdgesFromVertex(currentVertex, "ANY");
+                    EdgeList<T, V, E> edges = this.elementProvider.getAdjacentEdgesFromVertex(currentVertex, "ANY");
                     for (E edge : edges) {
                         V neighbor = (V) edge.getOther(currentVertex);
                         if (!visited.contains(neighbor)) {
@@ -527,7 +534,7 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
      * @param direction
      */
     private void dfs(V currentVertex, V endVertex,
-            EdgeList<E> currentPath, Set<V> visitedVertex,
+            EdgeList<T, V, E> currentPath, Set<V> visitedVertex,
             int currentDepth, int maxDepth,
             Predicate<E> nodeFilter, String direction) {
         /**
@@ -583,7 +590,7 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
             /**
              * So lets find our neighboors
              */
-            EdgeList<E> adjacentEdges = this.elementProvider.getAdjacentEdgesFromVertex(currentVertex, direction);
+            EdgeList<T, V, E> adjacentEdges = this.elementProvider.getAdjacentEdgesFromVertex(currentVertex, direction);
             /**
              * Ok, lets check the edges
              */
@@ -592,7 +599,7 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
                 for (final E edge : adjacentEdges) {
 
                     final Set<V> newVisitedVertex = new HashSet<>(visitedVertex);
-                    final EdgeList<E> newPath = new EdgeList<>(currentPath);
+                    final EdgeList<T, V, E> newPath = new EdgeList<>(currentPath);
 
                     /**
                      * Here we should send it to the stream as a new path has
@@ -691,7 +698,7 @@ public abstract class AbsBaseGraph<E extends IEdge<T, V>, V extends IVertex<T>, 
      * @return
      */
     @Override
-    public IElementProvider<E, V> getProvider() {
+    public IElementProvider<T, E, V> getProvider() {
         return this.elementProvider;
     }
 

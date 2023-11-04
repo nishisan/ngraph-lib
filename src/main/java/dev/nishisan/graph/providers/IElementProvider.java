@@ -28,9 +28,25 @@ import java.util.stream.Stream;
  * @author Lucas Nishimura <lucas.nishimura at gmail.com>
  * created 26.10.2023
  */
-public interface IElementProvider<E extends IEdge<? extends Serializable, ? extends IVertex<? extends Serializable>>, V extends IVertex<? extends Serializable>> {
+public interface IElementProvider<    T extends Serializable, E extends IEdge<T, V>, V extends IVertex<T, E>> {
 
-    
+    /**
+     * Retrieves the direct connected edges from the vertex
+     *
+     * @param vertex
+     * @param direction
+     * @return
+     */
+    public EdgeList<T,V,E> getAdjacentEdgesFromVertex(V vertex, String direction);
+
+    /**
+     * Get the list of edges by a given vertex
+     *
+     * @param vertex
+     * @return
+     */
+    public EdgeList<T,V,E> getEdgesByVertex(V vertex);
+
     /**
      * Retrieve an Edge by its ID
      *
@@ -46,23 +62,6 @@ public interface IElementProvider<E extends IEdge<? extends Serializable, ? exte
      * @return
      */
     public V getVertexById(String id);
-
-    /**
-     * Retrieves the direct connected edges from the vertex
-     *
-     * @param vertex
-     * @param direction
-     * @return
-     */
-    public EdgeList<E> getAdjacentEdgesFromVertex(V vertex, String direction);
-
-    /**
-     * Get the list of edges by a given vertex
-     *
-     * @param vertex
-     * @return
-     */
-    public EdgeList<E> getEdgesByVertex(V vertex);
 
     /**
      * Adds an Edge to the the persistence layer

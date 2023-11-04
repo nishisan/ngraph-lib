@@ -22,6 +22,6 @@ package dev.nishisan.graph.processmanager;
  * @author Lucas Nishimura <lucas.nishimura at gmail.com>
  * created 29.10.2023
  */
-public class SimpleProcessManager extends AbsGraphProcessManager {
+public class SimpleProcessManager extends AbstractGraphProcessManager {
 
 }

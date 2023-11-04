@@ -19,6 +19,7 @@ package dev.nishisan.graph.queue.list;
 
 import dev.nishisan.graph.elements.IEdge;
 import dev.nishisan.graph.elements.IVertex;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -28,7 +29,9 @@ import java.util.Collection;
  * created 30.10.2023
  * @param <E>
  */
-public class EdgeList<E extends IEdge<?,? extends IVertex<?>>> extends ArrayList<E> {
+public class EdgeList<T extends Serializable, 
+    V extends IVertex<T, E>, 
+    E extends IEdge<T, V>> extends ArrayList<E> {
 
     public EdgeList() {
     }
@@ -42,7 +45,7 @@ public class EdgeList<E extends IEdge<?,? extends IVertex<?>>> extends ArrayList
      *
      * @return
      */
-    public VertexList<?> getVertices() {
+    public VertexList<T,V,E> getVertices() {
         VertexList result = new VertexList();
         if (!this.isEmpty()) {
             this.forEach(e -> {

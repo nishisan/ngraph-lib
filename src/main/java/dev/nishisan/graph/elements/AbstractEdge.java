@@ -26,13 +26,13 @@ import java.util.List;
  * @param <T>
  * @param <V> created 26.10.2023
  */
-public abstract class AbsBaseEdge<T extends Serializable, V extends IVertex<T>> extends AbsBaseElement<T> implements IEdge<T, V> {
+public abstract class AbstractEdge<T extends Serializable, V extends IVertex<T, ? extends IEdge<T, V>>> extends AbstractElement<T> implements IEdge<T, V> {
 
     private V from;
 
     private V to;
 
-    public AbsBaseEdge(String id, T data) {
+    public AbstractEdge(String id, T data) {
         super(id, data);
     }
 

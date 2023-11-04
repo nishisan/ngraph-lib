@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author Lucas Nishimura <lucas.nishimura at gmail.com>
  * @created 29.10.2023
  */
-public class AbsGraphProcessManager implements IGraphProcessManager {
+public class AbstractGraphProcessManager implements IGraphProcessManager {
 
     private final AtomicBoolean started = new AtomicBoolean(false);
     private final Map<String, Boolean> subProcesses = new ConcurrentHashMap<>();

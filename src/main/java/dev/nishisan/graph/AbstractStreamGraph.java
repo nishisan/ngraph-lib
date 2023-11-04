@@ -15,21 +15,21 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package dev.nishisan.graph.elements.impl;
+package dev.nishisan.graph;
 
-import dev.nishisan.graph.elements.AbsBaseElement;
-import dev.nishisan.graph.elements.IVertex;
+import dev.nishisan.graph.providers.IElementProvider;
 
 /**
- * A Simple String Vertex Representation
+ * Stream Graphs Retrieve Dinamically the topology
  *
  * @author Lucas Nishimura <lucas.nishimura at gmail.com>
+ * @param <T>
  * created 26.10.2023
  */
-public class StringVertex extends AbsBaseElement<String> implements IVertex<String> {
+public abstract class AbstractStreamGraph<T> extends AbstractGraph {
 
-    public StringVertex(String id, String data) {
-        super(id, data);
+    public AbstractStreamGraph(IElementProvider elementProvider) {
+        super(elementProvider);
     }
 
 }

@@ -22,9 +22,13 @@ import java.io.Serializable;
 /**
  *
  * @author Lucas Nishimura <lucas.nishimura at gmail.com>
- * created 26.10.2023
- * @param <T> Any Seriali
+ * created 26.10.2023 IEdge<T extends Serializable, V extends IVertex<T>> @param
+ * <T> Any Serialible
  */
-public interface IVertex<T extends Serializable> extends IElement<T> {
+//public interface IVertex<T extends Serializable> extends IElement<T> {
+public interface IVertex<T extends Serializable, E extends IEdge<T, ? extends IVertex<T, E>>> extends IElement<T> {
+    public void addEdge(IEdge edge);
+
+    public Long getDegree();
 
 }

@@ -25,12 +25,12 @@ import java.util.Objects;
  * @author Lucas Nishimura <lucas.nishimura at gmail.com>
  * created 26.10.2023
  */
-public abstract class AbsBaseElement<T extends Serializable> implements IElement<T> {
+public abstract class AbstractElement<T extends Serializable> implements IElement<T> {
 
     private String id;
     private T data;
 
-    public AbsBaseElement(String id, T data) {
+    public AbstractElement(String id, T data) {
         this.id = id;
         this.data = data;
     }
@@ -73,7 +73,7 @@ public abstract class AbsBaseElement<T extends Serializable> implements IElement
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final AbsBaseElement<?> other = (AbsBaseElement<?>) obj;
+        final AbstractElement<?> other = (AbstractElement<?>) obj;
         return Objects.equals(this.id, other.id);
     }
 

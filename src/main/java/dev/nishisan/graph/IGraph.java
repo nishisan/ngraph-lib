@@ -30,7 +30,7 @@ import java.util.stream.Stream;
  * @param <E>
  * @param <V> created 26.10.2023
  */
-public interface IGraph<E extends IEdge<T, V>, V extends IVertex<T>, T extends Serializable> {
+public interface IGraph<T extends Serializable, V extends IVertex<T, E>, E extends IEdge<T, V>> {
 
     public E addEdge(V from, V to) throws UnsupportedOperationException;
 
@@ -97,7 +97,7 @@ public interface IGraph<E extends IEdge<T, V>, V extends IVertex<T>, T extends S
      * @param startVertex
      * @return
      */
-    public Stream<EdgeList<E>> dfs(V startVertex);
+    public Stream<EdgeList<T,V,E>> dfs(V startVertex);
 
     /**
      *
@@ -105,7 +105,7 @@ public interface IGraph<E extends IEdge<T, V>, V extends IVertex<T>, T extends S
      * @param maxDeph - The max deph, 0 means no limit
      * @return
      */
-    public Stream<EdgeList<E>> dfs(V startVertex, Integer maxDeph);
+    public Stream<EdgeList<T,V,E>> dfs(V startVertex, Integer maxDeph);
 
     /**
      *
@@ -114,11 +114,11 @@ public interface IGraph<E extends IEdge<T, V>, V extends IVertex<T>, T extends S
      * @param threadCount - The amount of workers threads to perform the dfs
      * @return
      */
-    public Stream<EdgeList<E>> dfs(V startVertex, Integer maxDeph, Integer threadCount);
+    public Stream<EdgeList<T,V,E>> dfs(V startVertex, Integer maxDeph, Integer threadCount);
 
-    public Stream<EdgeList<E>> dfs(V startVertex, V endVertex, Integer maxDeph, Integer threadCount);
+    public Stream<EdgeList<T,V,E>> dfs(V startVertex, V endVertex, Integer maxDeph, Integer threadCount);
 
-    public Stream<EdgeList<E>> dfs(V startVertex, V endVertex);
+    public Stream<EdgeList<T,V,E>> dfs(V startVertex, V endVertex);
 
     /**
      * BFS Example
@@ -126,15 +126,15 @@ public interface IGraph<E extends IEdge<T, V>, V extends IVertex<T>, T extends S
      * @param startVertex
      * @return
      */
-    public Stream<EdgeList<E>> bfs(V startVertex);
+    public Stream<EdgeList<T,V,E>> bfs(V startVertex);
 
-    public Stream<EdgeList<E>> bfs(V startVertex, V endVertex);
+    public Stream<EdgeList<T,V,E>> bfs(V startVertex, V endVertex);
 
 //    public void setMultiThreaded(Boolean mThread);
     public Boolean isMultiThreaded();
 
 //    public void setThreadCount(int threadCount);
-    public IElementProvider<E, V> getProvider();
+    public IElementProvider<T, E, V> getProvider();
 
     public Long getVertexCount();
 

@@ -37,11 +37,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @param <V>
  * @param <T>
  */
-public class LouvainAlgorithm<E extends IEdge<T, V>, V extends IVertex<T>, T extends Serializable> {
+public class LouvainAlgorithm<
+    T extends Serializable, V extends IVertex<T, E>, E extends IEdge<T, V>> {
 
-    private final IGraph<E, V, T> graph;
+    private final IGraph<T,V,E> graph;
 
-    public LouvainAlgorithm(IGraph<E, V, T> graph) {
+    public LouvainAlgorithm(IGraph<T,V,E> graph) {
         this.graph = graph;
     }
 

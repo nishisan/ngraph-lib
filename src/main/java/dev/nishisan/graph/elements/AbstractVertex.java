@@ -15,20 +15,30 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package dev.nishisan.graph.elements.impl;
+package dev.nishisan.graph.elements;
 
-import dev.nishisan.graph.elements.AbsBaseEdge;
+import java.io.Serializable;
 
 /**
- * A Simple String Edge Representation
+ *
  * @author Lucas Nishimura <lucas.nishimura at gmail.com>
  * created 26.10.2023
  */
-public class StringEdge extends AbsBaseEdge<String, StringVertex> {
+//public abstract class AbsBaseVertex<T extends Serializable> extends AbsBaseElement<T> implements IVertex<T> {
+public abstract class AbstractVertex<T extends Serializable, E extends IEdge<T, ? extends IVertex<T, E>>> extends AbstractElement<T> implements IVertex<T, E> {
 
-    public StringEdge(String id,String data) {
-        super(id,data);
-        
+    public AbstractVertex(String id, T data) {
+        super(id, data);
+    }
+
+    @Override
+    public Long getDegree() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void addEdge(IEdge edge) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
 }

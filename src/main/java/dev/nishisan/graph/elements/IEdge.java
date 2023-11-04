@@ -27,8 +27,8 @@ import java.util.List;
  * @param <T>
  * @param <V>
  */
-public interface IEdge<T extends Serializable, V extends IVertex<T>> extends IElement<T> {
-
+//public interface IEdge<T extends Serializable, V extends IVertex<T>> extends IElement<T> {
+public interface IEdge<T extends Serializable, V extends IVertex<T, ? extends IEdge<T, V>>> extends IElement<T> {
     public V getFrom();
 
     public V getTo();
