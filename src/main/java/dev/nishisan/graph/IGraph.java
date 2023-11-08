@@ -22,6 +22,7 @@ import dev.nishisan.graph.elements.IVertex;
 import dev.nishisan.graph.providers.IElementProvider;
 import dev.nishisan.graph.queue.list.EdgeList;
 import java.io.Serializable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 /**
@@ -97,7 +98,7 @@ public interface IGraph<T extends Serializable, V extends IVertex<T, E>, E exten
      * @param startVertex
      * @return
      */
-    public Stream<EdgeList<T,V,E>> dfs(V startVertex);
+    public Stream<EdgeList<T, V, E>> dfs(V startVertex);
 
     /**
      *
@@ -105,7 +106,7 @@ public interface IGraph<T extends Serializable, V extends IVertex<T, E>, E exten
      * @param maxDeph - The max deph, 0 means no limit
      * @return
      */
-    public Stream<EdgeList<T,V,E>> dfs(V startVertex, Integer maxDeph);
+    public Stream<EdgeList<T, V, E>> dfs(V startVertex, Integer maxDeph);
 
     /**
      *
@@ -114,11 +115,11 @@ public interface IGraph<T extends Serializable, V extends IVertex<T, E>, E exten
      * @param threadCount - The amount of workers threads to perform the dfs
      * @return
      */
-    public Stream<EdgeList<T,V,E>> dfs(V startVertex, Integer maxDeph, Integer threadCount);
+    public Stream<EdgeList<T, V, E>> dfs(V startVertex, Integer maxDeph, Integer threadCount);
 
-    public Stream<EdgeList<T,V,E>> dfs(V startVertex, V endVertex, Integer maxDeph, Integer threadCount);
+    public Stream<EdgeList<T, V, E>> dfs(V startVertex, V endVertex, Integer maxDeph, Integer threadCount);
 
-    public Stream<EdgeList<T,V,E>> dfs(V startVertex, V endVertex);
+    public Stream<EdgeList<T, V, E>> dfs(V startVertex, V endVertex);
 
     /**
      * BFS Example
@@ -126,9 +127,9 @@ public interface IGraph<T extends Serializable, V extends IVertex<T, E>, E exten
      * @param startVertex
      * @return
      */
-    public Stream<EdgeList<T,V,E>> bfs(V startVertex);
+    public Stream<EdgeList<T, V, E>> bfs(V startVertex);
 
-    public Stream<EdgeList<T,V,E>> bfs(V startVertex, V endVertex);
+    public Stream<EdgeList<T, V, E>> bfs(V startVertex, V endVertex);
 
 //    public void setMultiThreaded(Boolean mThread);
     public Boolean isMultiThreaded();
@@ -142,4 +143,5 @@ public interface IGraph<T extends Serializable, V extends IVertex<T, E>, E exten
 
     public Integer getMaxQueueUsage();
 
+  
 }

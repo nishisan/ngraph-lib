@@ -43,5 +43,13 @@ public interface IGraphProcessManager {
     public boolean isSubProcessRunning(String uid);
     
     public void registerChildThread(Future<?> f);
+    
+    /**
+     * Resets the process manager to its initial state
+     */
+    public void reset();
+    
+    
+//    public void notifyLastMsg(String uid, String msg);
 
 }

@@ -23,6 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -34,9 +36,26 @@ public class AbstractGraphProcessManager implements IGraphProcessManager {
     private final AtomicBoolean started = new AtomicBoolean(false);
     private final Map<String, Boolean> subProcesses = new ConcurrentHashMap<>();
     private final AtomicLong futureId = new AtomicLong(0);
-    private Map<Long, Future<?>> childThreads = new ConcurrentHashMap<>();
+    private final Map<Long, Future<?>> childThreads = new ConcurrentHashMap<>();
     private final AtomicBoolean isDone = new AtomicBoolean(false);
     private final AtomicBoolean isFirst = new AtomicBoolean(true);
+    private final Thread statsThread = new Thread(new InternalStatsThread(), "ProcessManagerThread");
+    private String lastUid = "";
+    private String lastMsg = "";
+
+//    @Override
+//    public void notifyLastMsg(String uid, String msg) {
+//        this.lastMsg = msg;
+//        this.lastUid = uid;
+//
+//    }
+
+    public AbstractGraphProcessManager() {
+        /**
+         * Auto Start the Internal Process Thread
+         */
+        statsThread.start();
+    }
 
     @Override
     public boolean hasStarted() {
@@ -75,7 +94,9 @@ public class AbstractGraphProcessManager implements IGraphProcessManager {
                     this.setDone();
                 }
             }
-
+            /**
+             * May Return False
+             */
             return !this.isDone.get();
         } else {
             return true;
@@ -131,6 +152,41 @@ public class AbstractGraphProcessManager implements IGraphProcessManager {
     @Override
     public void registerChildThread(Future<?> f) {
         this.childThreads.put(futureId.incrementAndGet(), f);
+    }
+
+    @Override
+    public void reset() {
+        this.started.set(false);
+        this.subProcesses.clear();
+        this.futureId.set(0);
+        this.childThreads.clear();
+        this.isDone.set(false);
+        this.isFirst.set(true);
+    }
+
+    private class InternalStatsThread implements Runnable {
+
+        @Override
+        public void run() {
+            while (true) {
+                /**
+                 * Compute Processes Stats
+                 */
+                System.out.println("----------------- Process Manager Stats ----------------- ");
+                System.out.println("Total Subprocess Count: " + subProcesses.size());
+                System.out.println("Active Child Thread: " + childThreads.values().stream().filter(f -> !f.isDone()).count());
+                System.out.println("Is Running: " + isRunning());
+                System.out.println("last msg: [" + lastMsg + "] From:[" + lastUid + "]");
+
+                System.out.println("--------------------------------------------------------- ");
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
     }
 
 }

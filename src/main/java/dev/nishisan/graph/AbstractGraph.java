@@ -24,6 +24,7 @@ import dev.nishisan.graph.processmanager.SimpleProcessManager;
 import dev.nishisan.graph.providers.IElementProvider;
 import dev.nishisan.graph.queue.list.EdgeList;
 import dev.nishisan.graph.queue.GraphResultQueue;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
@@ -102,7 +103,7 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
     /**
      * Interna Thread Pool
      */
-    private final ExecutorService internalThreadPool = Executors.newFixedThreadPool(2);
+    private ExecutorService internalThreadPool = Executors.newFixedThreadPool(2);
 
     /**
      * Creates an Instance of the graph with the element provider
@@ -165,9 +166,14 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
      */
     @Override
     public Stream<EdgeList<T, V, E>> dfs(V startVertex, Integer maxDepth, Integer threadCount) {
+
         /**
          * This will create the Callee Thread...
          */
+        this.resultQueue.reset();
+        this.processManager.reset();
+        this.processManager.setStarted();
+
         CompletableFuture running = CompletableFuture.runAsync(() -> {
             /**
              * This will create the processing thread
@@ -190,6 +196,10 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
      */
     @Override
     public Stream<EdgeList<T, V, E>> dfs(V startVertex, Integer maxDepth) {
+
+        this.resultQueue.reset();
+        this.processManager.reset();
+        this.processManager.setStarted();
         /**
          * This will create the Callee Thread...
          */
@@ -210,9 +220,14 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
      */
     @Override
     public Stream<EdgeList<T, V, E>> dfs(V startVertex) {
+
+        this.resultQueue.reset();
+        this.processManager.reset();
+        this.processManager.setStarted();
         /**
          * This will create the Callee Thread...
          */
+
         CompletableFuture running = CompletableFuture.runAsync(() -> {
             /**
              * This will create the processing thread
@@ -235,6 +250,9 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
     @Override
     public Stream<EdgeList<T, V, E>> dfs(V startVertex, V endVertex) {
 
+        this.resultQueue.reset();
+        this.processManager.reset();
+        this.processManager.setStarted();
         /**
          * This will create the Callee Thread...
          */
@@ -252,6 +270,9 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
     @Override
     public Stream<EdgeList<T, V, E>> dfs(V startVertex, V endVertex, Integer maxDepth, Integer threadCount) {
 
+        this.resultQueue.reset();
+        this.processManager.reset();
+        this.processManager.setStarted();
         /**
          * This will create the Callee Thread...
          */
@@ -267,6 +288,11 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
 
     @Override
     public Stream<EdgeList<T, V, E>> bfs(V startVertex) {
+
+        this.resultQueue.reset();
+        this.processManager.reset();
+        this.processManager.setStarted();
+
         CompletableFuture running = CompletableFuture.runAsync(() -> {
             /**
              * This will create the processing thread
@@ -290,6 +316,7 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
     }
 
     private Future<?> runBfs(V startVertex, V endVertex, Integer threadCount) {
+        this.processManager.reset();
         /**
          * Notify Process Manager a Process has Started
          */
@@ -325,7 +352,6 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
         /**
          * Notify Process Manager a Process has Started
          */
-        this.processManager.setStarted();
 
         if (threadCount != null) {
             this.setMultiThreaded(true);
@@ -333,6 +359,10 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
             this.initThreadPool();
         } else {
             this.setMultiThreaded(false);
+        }
+
+        if (internalThreadPool.isShutdown()) {
+            this.internalThreadPool = Executors.newFixedThreadPool(2);
         }
 
         /**
@@ -365,11 +395,32 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
                  */
                 boolean result = false;
                 if (resultQueue.isEmpty()) {
-                    result = processManager.isRunning();
+                    if (processManager.isRunning()) {
+                        return true;
+                    }
                 } else {
-                    result = true;
+                    return true;
                 }
 
+                if (!result) {
+                    try {
+                        if (!resultQueue.isEmpty()) {
+                            return true;
+                        }
+                        if (processManager.isRunning()) {
+                            return true;
+                        }
+                        if (!internalThreadPool.isShutdown()) {
+                            return true;
+                        }
+                        //
+                        // Will return false.
+                        //
+                        resultQueue.close();
+                    } catch (IOException ex) {
+
+                    }
+                }
                 return result;
             }
 
@@ -399,7 +450,6 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
             }
         };
 
-       
         return StreamSupport.stream(((Iterable<EdgeList<T, V, E>>) () -> iterator).spliterator(), false).filter(Objects::nonNull);
     }
 
@@ -423,7 +473,6 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
                 //
                 // Multi Thread Implementation
                 //
-
                 if (this.threadPool.getActiveCount() < this.threadCount) {
                     /**
                      * Can Submit new thread
@@ -533,7 +582,7 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
      * @param nodeFilter
      * @param direction
      */
-    private void dfs(V currentVertex, V endVertex,
+    private synchronized void dfs(V currentVertex, V endVertex,
             EdgeList<T, V, E> currentPath, Set<V> visitedVertex,
             int currentDepth, int maxDepth,
             Predicate<E> nodeFilter, String direction) {
@@ -542,6 +591,7 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
          */
         String uidInstance = this.processManager.notifySubprocessStarted();
         iterationCounter.incrementAndGet();
+
         try {
             /**
              * Check if had Visited it before
@@ -551,11 +601,14 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
                  * Por se tratar de full Path, todas as soluções são aceitaveis
                  */
                 if (endVertex == null) {
+//                    this.processManager.notifyLastMsg(uidInstance, "1");
                     this.resultQueue.put(currentPath);
+//                    this.processManager.notifyLastMsg(uidInstance, "1.1");
                 }
 
                 return;
             } else {
+
                 visitedVertex.add(currentVertex);
             }
 
@@ -567,8 +620,9 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
                     /**
                      * Append to the stream queue because is a full walk
                      */
-
+//                    this.processManager.notifyLastMsg(uidInstance, "2");
                     this.resultQueue.put(currentPath);
+//                    this.processManager.notifyLastMsg(uidInstance, "2.1");
                     return;
                 }
             } else {
@@ -590,11 +644,15 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
             /**
              * So lets find our neighboors
              */
+//            this.processManager.notifyLastMsg(uidInstance, "A");
             EdgeList<T, V, E> adjacentEdges = this.elementProvider.getAdjacentEdgesFromVertex(currentVertex, direction);
+//            this.processManager.notifyLastMsg(uidInstance, "A.1");
             /**
              * Ok, lets check the edges
              */
+//            this.processManager.notifyLastMsg(uidInstance, "B");
             adjacentEdges.removeAll(currentPath);
+//            this.processManager.notifyLastMsg(uidInstance, "B.1");
             if (!adjacentEdges.isEmpty()) {
                 for (final E edge : adjacentEdges) {
 
@@ -610,31 +668,47 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
                         if (this.isMultiThreaded()) {
 
                             /**
-                             * Multi Thread DFS Shout Check for Available thread
-                             * to start other wise will do in the current thread
+                             * Multi Thread DFS Should Check for Available
+                             * thread to start other wise will do in the current
+                             * thread
                              */
-                            if (this.threadPool.getActiveCount() < this.threadCount) {
+//                            if (threadControlLock.tryLock(10, TimeUnit.MILLISECONDS)) {
+                            if (this.threadPool.getActiveCount() < this.threadCount - 1) {
                                 /**
                                  * Can Submit new thread
                                  */
+//                                this.processManager.notifyLastMsg(uidInstance, "C");
                                 Future<?> f = this.threadPool.submit(() -> {
                                     this.dfs(edge.getOther(currentVertex), endVertex, newPath, newVisitedVertex, currentDepth + 1, maxDepth, nodeFilter, direction);
                                 });
+//                                this.processManager.notifyLastMsg(uidInstance, "C.1");
                                 processManager.registerChildThread(f);
+
                             } else {
                                 /**
                                  * Need to reuse the same thread
                                  */
+//                                this.processManager.notifyLastMsg(uidInstance, "D");
                                 this.dfs(edge.getOther(currentVertex), endVertex, newPath, newVisitedVertex, currentDepth + 1, maxDepth, nodeFilter, direction);
+//                                this.processManager.notifyLastMsg(uidInstance, "D.1");
                             }
-
                         } else {
                             /**
-                             * In this case by default will use a single thread
+                             * Need to reuse the same thread because we didnt
+                             * get a lock on the control thread
                              */
-
+//                            this.processManager.notifyLastMsg(uidInstance, "E");
                             this.dfs(edge.getOther(currentVertex), endVertex, newPath, newVisitedVertex, currentDepth + 1, maxDepth, nodeFilter, direction);
+//                            this.processManager.notifyLastMsg(uidInstance, "E.1");
                         }
+
+//                        } else {
+//                            /**
+//                             * In this case by default will use a single thread
+//                             */
+//
+//                            this.dfs(edge.getOther(currentVertex), endVertex, newPath, newVisitedVertex, currentDepth + 1, maxDepth, nodeFilter, direction);
+//                        }
                     } else {
                         /**
                          * Already Visited Path
@@ -650,9 +724,11 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
                 /**
                  * Append to the stream queue because is a full walk
                  */
+//                this.processManager.notifyLastMsg(uidInstance, "3");
                 this.resultQueue.put(currentPath);
+//                this.processManager.notifyLastMsg(uidInstance, "3.1");
             }
-        } catch (Exception ex) {
+        } catch (InterruptedException ex) {
             /**
              * Only god know why, and perhaps someone else smarter than me
              */
@@ -670,25 +746,34 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
      */
     private void initThreadPool() {
         if (this.isMultiThreaded) {
-            if (this.threadPool == null) {
-                this.threadPoolQueue = new LinkedBlockingQueue<>(this.threadCount + 1); // <- Always 1 plus
-                RejectedExecutionHandler blockingHandler = (r, executor) -> {
-                    try {
-                        executor.getQueue().put(r);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                };
 
-                this.threadPool = new ThreadPoolExecutor(
-                        this.threadCount,
-                        this.threadCount,
-                        0L,
-                        TimeUnit.MILLISECONDS,
-                        this.threadPoolQueue,
-                        blockingHandler
-                );
+            if (this.threadPool != null) {
+                if (this.threadPool.getActiveCount() > 0 || !this.threadPoolQueue.isEmpty()) {
+                    System.out.println("!!!! Warning, incomplete Jobs overrides....");
+                }
             }
+            int capacity = (this.threadCount * 2) + 1;
+            this.threadPoolQueue = new LinkedBlockingQueue<>(capacity); // <- Always 1 plus
+            RejectedExecutionHandler blockingHandler = (r, executor) -> {
+                try {
+
+                    while (!executor.getQueue().offer(r, 100, TimeUnit.MILLISECONDS)) {
+                        System.out.println("Retrying::" + executor.getQueue().size() + "/" + capacity);
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            };
+
+            this.threadPool = new ThreadPoolExecutor(
+                    this.threadCount,
+                    this.threadCount,
+                    0L,
+                    TimeUnit.MILLISECONDS,
+                    this.threadPoolQueue,
+                    blockingHandler
+            );
+
         }
     }
 
