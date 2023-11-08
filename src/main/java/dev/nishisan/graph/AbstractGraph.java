@@ -428,16 +428,28 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
             public EdgeList<T, V, E> next() {
                 try {
                     EdgeList<T, V, E> r = null;
+                    AtomicLong dynamicTimeout = new AtomicLong(1);
+                    AtomicLong missFiredCounter = new AtomicLong(1);
                     while (r == null) {
                         /**
                          * Still not perfect but avoids CPU sparks...
                          */
 
-                        r = resultQueue.poll(10, TimeUnit.MILLISECONDS);
+                        r = resultQueue.poll(dynamicTimeout.get(), TimeUnit.MILLISECONDS);
 
                         if (processManager.isDone()) {
                             if (r != null) {
+                                 missFiredCounter.set(0);
+                                 dynamicTimeout.set(1);
                                 return r;
+                            } else {
+                                missFiredCounter.incrementAndGet();
+                                if (missFiredCounter.get() > 5) {
+                                    if (dynamicTimeout.get() < 10) {
+                                        dynamicTimeout.incrementAndGet();
+                                    }
+                                }
+
                             }
                             return null;
                         }
@@ -445,6 +457,7 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
                     return r;  // Wait until an element is available
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
+                    System.out.println("Returning Null 1");
                     return null;
                 }
             }
@@ -735,8 +748,9 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
             ex.printStackTrace();
             Thread.currentThread().interrupt();
         } finally {
-            this.processManager.notifySubProcessEnd(uidInstance);
-
+            if (!this.processManager.notifySubProcessEnd(uidInstance)) {
+                System.out.println("Failed to remove: [" + uidInstance + "]");
+            }
         }
 
     }
@@ -757,9 +771,10 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
             RejectedExecutionHandler blockingHandler = (r, executor) -> {
                 try {
 
-                    while (!executor.getQueue().offer(r, 100, TimeUnit.MILLISECONDS)) {
-                        System.out.println("Retrying::" + executor.getQueue().size() + "/" + capacity);
-                    }
+//                    while (!executor.getQueue().offer(r, 100, TimeUnit.MILLISECONDS)) {
+//                        System.out.println("Retrying::" + executor.getQueue().size() + "/" + capacity);
+//                    }
+                    executor.getQueue().put(r);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }

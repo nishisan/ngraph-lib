@@ -51,6 +51,7 @@ public class GraphResultQueue<T> extends LinkedBlockingQueue<T> implements Close
 
     @Override
     public void put(T e) throws InterruptedException {
+        //System.out.println("Putting...");
         int size = this.size();
         if (size > maxObjectOnQueue.get()) {
             this.maxObjectOnQueue.set(size);
@@ -59,6 +60,7 @@ public class GraphResultQueue<T> extends LinkedBlockingQueue<T> implements Close
         if (e != null) {
             addedObjectCount.incrementAndGet();
         }
+        //System.out.println("Puted...");
     }
 
     @Override
@@ -88,7 +90,13 @@ public class GraphResultQueue<T> extends LinkedBlockingQueue<T> implements Close
 
     @Override
     public T poll(long timeout, TimeUnit unit) throws InterruptedException {
+        //System.out.println ("Pooling");
         T result = super.poll(timeout, unit);
+        if (result != null) {
+            //System.out.println("Pooled OK " + addedObjectCount.get());
+        }else{
+            //System.out.println("Pooled Null");
+        }
         return result;
     }
 
@@ -104,6 +112,7 @@ public class GraphResultQueue<T> extends LinkedBlockingQueue<T> implements Close
     @Override
     public void close() throws IOException {
         running = false;
+//        //System.out.println("Closed");
     }
 
     private class InternalQueueStats implements Runnable {
@@ -126,6 +135,7 @@ public class GraphResultQueue<T> extends LinkedBlockingQueue<T> implements Close
                     lastValue = currentValue;
 
                     recPerSeconds = (delta / elapsedTime) * 1000D;
+//                    //System.out.println(":::" + recPerSeconds + " Delta:::" + delta +" Total:" + addedObjectCount.get());
                 }
 
                 lastTimeStamp = System.currentTimeMillis();

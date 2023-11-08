@@ -23,8 +23,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -49,12 +47,11 @@ public class AbstractGraphProcessManager implements IGraphProcessManager {
 //        this.lastUid = uid;
 //
 //    }
-
     public AbstractGraphProcessManager() {
         /**
          * Auto Start the Internal Process Thread
          */
-        statsThread.start();
+//        statsThread.start();
     }
 
     @Override
@@ -118,6 +115,9 @@ public class AbstractGraphProcessManager implements IGraphProcessManager {
     public String notifySubprocessStarted() {
         String uuid = UUID.randomUUID().toString();
         subProcesses.put(uuid, true);
+        if (this.isDone.get()) {
+            this.isDone.set(false);
+        }
         return uuid;
     }
 
@@ -131,9 +131,14 @@ public class AbstractGraphProcessManager implements IGraphProcessManager {
         if (this.subProcesses.containsKey(uid)) {
             this.subProcesses.remove(uid);
             if (this.subProcesses.isEmpty()) {
-                if (this.childThreads.isEmpty()) {
-                    this.setDone();
+                //
+                // 
+                //
+                if (!this.isDone.get()) {
+                    this.isDone.set(true);
                 }
+
+                
             }
             return true;
         }
@@ -175,7 +180,9 @@ public class AbstractGraphProcessManager implements IGraphProcessManager {
                 System.out.println("----------------- Process Manager Stats ----------------- ");
                 System.out.println("Total Subprocess Count: " + subProcesses.size());
                 System.out.println("Active Child Thread: " + childThreads.values().stream().filter(f -> !f.isDone()).count());
-                System.out.println("Is Running: " + isRunning());
+//                System.out.println("Is Running: " + isRunning());
+                System.out.println("Is First: " + isFirst.get());
+                System.out.println("Is Done: " + isDone.get());
                 System.out.println("last msg: [" + lastMsg + "] From:[" + lastUid + "]");
 
                 System.out.println("--------------------------------------------------------- ");
