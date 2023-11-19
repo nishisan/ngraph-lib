@@ -18,27 +18,44 @@
 package dev.nishisan.graph.elements;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
  * @author Lucas Nishimura <lucas.nishimura at gmail.com>
  * created 26.10.2023
+ * @param <T>
+ * @param <E>
  */
-//public abstract class AbsBaseVertex<T extends Serializable> extends AbsBaseElement<T> implements IVertex<T> {
 public abstract class AbstractVertex<T extends Serializable, E extends IEdge<T, ? extends IVertex<T, E>>> extends AbstractElement<T> implements IVertex<T, E> {
 
-    public AbstractVertex(String id, T data) {
+    private Map<T, E> directedEdges = new ConcurrentHashMap<>();
+
+    public AbstractVertex(T id, T data) {
         super(id, data);
     }
 
     @Override
-    public Long getDegree() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void addEdge(E edge) {
+        if (!this.directedEdges.containsKey(edge.getId())) {
+            this.directedEdges.put(edge.getId(), edge);
+        }
     }
 
     @Override
-    public void addEdge(IEdge edge) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public Long getDegree() {
+        Long degree = Long.valueOf(this.directedEdges.size());
+        return degree;
+    }
+
+    @Override
+    public List<E> getEdges() {
+        List<E> edgesList = new ArrayList<>();
+        edgesList.addAll(this.directedEdges.values());
+        return edgesList;
     }
 
 }

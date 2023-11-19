@@ -19,6 +19,7 @@ package dev.nishisan.graph;
 
 import dev.nishisan.graph.elements.IEdge;
 import dev.nishisan.graph.elements.IVertex;
+import dev.nishisan.graph.listeners.IGraphListener;
 import dev.nishisan.graph.processmanager.IGraphProcessManager;
 import dev.nishisan.graph.processmanager.SimpleProcessManager;
 import dev.nishisan.graph.providers.IElementProvider;
@@ -59,6 +60,8 @@ import java.util.stream.StreamSupport;
  * @param <V>
  */
 public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V>, V extends IVertex<T, E>> implements IGraph<T, V, E> {
+
+    public Map<String, IGraphListener> listeners = new ConcurrentHashMap<>();
 
     /**
      * This flag tells if the graph should be multi threaded or not
@@ -439,8 +442,8 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
 
                         if (processManager.isDone()) {
                             if (r != null) {
-                                 missFiredCounter.set(0);
-                                 dynamicTimeout.set(1);
+                                missFiredCounter.set(0);
+                                dynamicTimeout.set(1);
                                 return r;
                             } else {
                                 missFiredCounter.incrementAndGet();
@@ -810,6 +813,14 @@ public abstract class AbstractGraph<T extends Serializable, E extends IEdge<T, V
     @Override
     public Integer getMaxQueueUsage() {
         return this.resultQueue.getMaxUsedCapacity();
+    }
+
+    @Override
+    public void registerGraphListener(IGraphListener<T, V, E> listener) {
+        this.listeners.put(listener.getId(), listener);
+    }
+
+    protected void hello(){
     }
 }
 

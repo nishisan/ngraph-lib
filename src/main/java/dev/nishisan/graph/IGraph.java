@@ -19,10 +19,10 @@ package dev.nishisan.graph;
 
 import dev.nishisan.graph.elements.IEdge;
 import dev.nishisan.graph.elements.IVertex;
+import dev.nishisan.graph.listeners.IGraphListener;
 import dev.nishisan.graph.providers.IElementProvider;
 import dev.nishisan.graph.queue.list.EdgeList;
 import java.io.Serializable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 /**
@@ -33,8 +33,13 @@ import java.util.stream.Stream;
  */
 public interface IGraph<T extends Serializable, V extends IVertex<T, E>, E extends IEdge<T, V>> {
 
+    public void registerGraphListener(IGraphListener<T, V, E> listener);
+
     public E addEdge(V from, V to) throws UnsupportedOperationException;
 
+    
+    
+    
     /**
      * Add an Edge
      *
@@ -143,5 +148,4 @@ public interface IGraph<T extends Serializable, V extends IVertex<T, E>, E exten
 
     public Integer getMaxQueueUsage();
 
-  
 }

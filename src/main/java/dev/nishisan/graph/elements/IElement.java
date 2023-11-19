@@ -23,14 +23,15 @@ import java.io.Serializable;
  *
  * @author Lucas Nishimura <lucas.nishimura at gmail.com>
  * created 26.10.2023
+ * @param <T>
  */
 public interface IElement<T extends Serializable> {
 
-    public String getId();
+    public T getId();
 
-    public void setId(String id);
-    
+    public void setId(T id);
+
     public T getData();
-    
+
     public void setData(T data);
 }

@@ -27,21 +27,21 @@ import java.util.Objects;
  */
 public abstract class AbstractElement<T extends Serializable> implements IElement<T> {
 
-    private String id;
+    private T id;
     private T data;
 
-    public AbstractElement(String id, T data) {
+    public AbstractElement(T id, T data) {
         this.id = id;
         this.data = data;
     }
 
     @Override
-    public String getId() {
+    public T getId() {
         return this.id;
     }
 
     @Override
-    public void setId(String id) {
+    public void setId(T id) {
         this.id = id;
     }
 

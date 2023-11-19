@@ -18,21 +18,12 @@
 package dev.nishisan.graph.elements;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  *
  * @author Lucas Nishimura <lucas.nishimura at gmail.com>
- * created 26.10.2023
- * @param <T>
- * @param <E>
+ * @created 19.11.2023
  */
-public interface IVertex<T extends Serializable, E extends IEdge<T, ? extends IVertex<T, E>>> extends IElement<T> {
-
-    public void addEdge(E edge);
-
-    public Long getDegree();
-
-    public List<E> getEdges();
+public interface IEdgeEventListener<T extends Serializable, V extends IVertex<T, ? extends IEdge<T, V>>> extends IElementEventListener<T> {
 
 }

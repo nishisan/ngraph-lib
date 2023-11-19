@@ -23,6 +23,7 @@ import java.util.List;
 /**
  *
  * @author Lucas Nishimura <lucas.nishimura at gmail.com>
+ *
  * @param <T>
  * @param <V> created 26.10.2023
  */
@@ -32,7 +33,20 @@ public abstract class AbstractEdge<T extends Serializable, V extends IVertex<T, 
 
     private V to;
 
-    public AbstractEdge(String id, T data) {
+    @Override
+    public void setFrom(V aPoint) {
+        this.from = aPoint;
+//        this.from.addEdge(this);
+
+    }
+
+    @Override
+    public void setTo(V zPoint) {
+        this.to = zPoint;
+//        this.to.addEdge((this);
+    }
+
+    public AbstractEdge(T id, T data) {
         super(id, data);
     }
 
@@ -44,16 +58,6 @@ public abstract class AbstractEdge<T extends Serializable, V extends IVertex<T, 
     @Override
     public V getTo() {
         return this.to;
-    }
-
-    @Override
-    public void setFrom(V aPoint) {
-        this.from = aPoint;
-    }
-
-    @Override
-    public void setTo(V zPoint) {
-        this.to = zPoint;
     }
 
     @Override
@@ -73,10 +77,7 @@ public abstract class AbstractEdge<T extends Serializable, V extends IVertex<T, 
 
     @Override
     public boolean contains(V point) {
-        if (this.from.equals(point) || this.to.equals(point)) {
-            return true;
-        }
-        return false;
+        return this.from.equals(point) || this.to.equals(point);
     }
 
     @Override

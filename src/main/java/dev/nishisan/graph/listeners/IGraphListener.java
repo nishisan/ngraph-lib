@@ -15,24 +15,26 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package dev.nishisan.graph.elements;
+package dev.nishisan.graph.listeners;
 
+import dev.nishisan.graph.elements.IEdge;
+import dev.nishisan.graph.elements.IVertex;
 import java.io.Serializable;
-import java.util.List;
 
 /**
  *
  * @author Lucas Nishimura <lucas.nishimura at gmail.com>
- * created 26.10.2023
- * @param <T>
- * @param <E>
+ * created 11.11.2023
  */
-public interface IVertex<T extends Serializable, E extends IEdge<T, ? extends IVertex<T, E>>> extends IElement<T> {
+public interface IGraphListener<T extends Serializable, V extends IVertex<T, E>, E extends IEdge<T, V>> {
 
-    public void addEdge(E edge);
+    public void onEdgeAdded(E createdEdge);
 
-    public Long getDegree();
+    public void onVertexAdded(V createdVertex);
 
-    public List<E> getEdges();
+    public void onEdgeVisited(E edge, String visitorId);
 
+    public void onVertexVisited(V vertex, String visitorId);
+    
+    public String getId();
 }
